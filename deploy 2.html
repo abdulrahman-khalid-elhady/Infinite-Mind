@@ -1,0 +1,1384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>INFINITE MIND V20: ULTIMATE EDITION</title>
+    <link rel="icon" type="image/svg+xml" href="
+data:image/svg+xml,
+<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'>
+  <defs>
+    <linearGradient id='g' x1='0' y1='0' x2='1' y2='1'>
+      <stop offset='0%' stop-color='%235f6cff'/>
+      <stop offset='50%' stop-color='%23962fbf'/>
+      <stop offset='100%' stop-color='%23fa7e1e'/>
+    </linearGradient>
+  </defs>
+
+  <rect width='100' height='100' rx='24' fill='%23050505'/>
+
+  <circle cx='50' cy='50' r='26' fill='url(%23g)'/>
+
+  <rect x='47' y='24' width='6' height='52' rx='3' fill='%23050505'/>
+</svg>
+">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <style>
+        /* --- DESIGN SYSTEM: CLASSY DARK (ENHANCED) --- */
+        :root {
+            --bg: #050505;
+            --surface: #121212;
+            --surface-light: #1e1e1e;
+            --primary: #4f5bd5;
+            --accent: #962fbf;
+            --gold: #fa7e1e;
+            --success: #00d26a;
+            --text: #ffffff;
+            --text-dim: #888888;
+            --font: "SF Pro Display", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            --ease: cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        * { box-sizing: border-box; user-select: none; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            margin: 0; background-color: var(--bg); color: var(--text);
+            font-family: var(--font); overflow: hidden; height: 100vh;
+            display: flex; flex-direction: column;
+        }
+
+        /* LAYOUT */
+        #layout { flex: 1; display: flex; flex-direction: column; position: relative; }
+
+        /* HEADER */
+        .header { padding: 20px 30px; display: flex; justify-content: space-between; align-items: center; z-index: 20; flex-wrap: wrap; gap: 15px; }
+        .score-box .label { font-size: 11px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 2px; }
+        .score-box .value { font-size: 36px; font-weight: 800; letter-spacing: -1px; }
+
+        .flow-badge {
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: 800;
+            opacity: 0; transform: translateY(20px); transition: all 0.4s var(--ease);
+            box-shadow: 0 5px 20px rgba(79, 91, 213, 0.4);
+        }
+        .flow-badge.active { opacity: 1; transform: translateY(0); }
+
+        .streak-badge {
+            background: linear-gradient(135deg, var(--gold), #ff9500);
+            padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: 800;
+            box-shadow: 0 5px 20px rgba(250, 126, 30, 0.4);
+        }
+
+        /* TIMER */
+        .timer-wrap { position: absolute; top: 0; left: 0; width: 100%; height: 4px; background: rgba(255,255,255,0.05); }
+        .timer-bar { height: 100%; background: var(--text); width: 100%; transform-origin: left; transition: background 0.2s; }
+
+        /* STAGE */
+        .stage { flex: 1; display: flex; position: relative; }
+        .divider { position: absolute; left: 50%; top: 15%; bottom: 15%; width: 1px; background: linear-gradient(to bottom, transparent, var(--surface-light), transparent); }
+
+        /* ZONES */
+        .zone { flex: 1; display: flex; justify-content: center; align-items: center; cursor: pointer; transition: background 0.1s; position: relative; }
+        .zone:active { background: rgba(255,255,255,0.04); }
+
+        /* PROMPT (The Clean Central Box) */
+        .prompt {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            background: rgba(18, 18, 18, 0.95); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
+            padding: 20px 50px; border-radius: 40px; border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+            display: flex; flex-direction: column; align-items: center; gap: 8px;
+            z-index: 30; pointer-events: none; min-width: 260px; text-align: center;
+        }
+        .prompt-label { font-size: 11px; color: var(--gold); text-transform: uppercase; letter-spacing: 3px; font-weight: 700; }
+        .prompt-main { font-size: 20px; font-weight: 700; color: var(--text); white-space: nowrap; letter-spacing: 0.5px; }
+
+        /* ENTITIES (Clean & Large) */
+        .entity {
+            font-size: 70px; font-weight: 700; transition: transform 0.4s var(--ease);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            text-align: center; width: 100%; padding: 20px;
+        }
+        .text-mode { font-size: 32px; letter-spacing: 1px; font-weight: 600; color: #eee; }
+        .math-mode { font-size: 50px; font-family: monospace; letter-spacing: -2px; }
+        
+        /* 3D Looking Emojis */
+        .emoji-mode { 
+            font-size: 100px; 
+            filter: drop-shadow(0 15px 25px rgba(0,0,0,0.6)); 
+            transform: scale(1);
+            transition: transform 0.3s;
+        }
+        
+        .sub-text {
+            font-size: 15px; color: var(--text-dim); margin-top: 20px; 
+            font-weight: 500; text-transform: uppercase; letter-spacing: 1px;
+        }
+
+        /* OVERLAYS */
+        .overlay {
+            position: fixed; inset: 0; z-index: 100; background: rgba(0,0,0,0.95);
+            backdrop-filter: blur(15px); display: flex; flex-direction: column;
+            justify-content: flex-start; align-items: center; transition: opacity 0.4s;
+            overflow-y: auto;
+            padding: 40px 20px;
+        }
+        .hidden { opacity: 0; pointer-events: none; }
+        
+        .overlay-content {
+            width: 100%;
+            max-width: 1200px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+        }
+        
+        h1 { 
+            font-size: 60px; 
+            margin: 0 0 10px 0; 
+            background: linear-gradient(to right, #fff, #888); 
+            -webkit-background-clip: text; 
+            -webkit-text-fill-color: transparent; 
+            letter-spacing: -3px;
+            text-align: center;
+        }
+        
+        .btn {
+            background: white; color: black; border: none; padding: 18px 50px;
+            border-radius: 50px; font-size: 18px; font-weight: 700; cursor: pointer;
+            margin-top: 30px; transition: transform 0.1s;
+        }
+        .btn:active { transform: scale(0.95); }
+
+        .btn-secondary {
+            background: var(--surface-light); color: white; border: 1px solid rgba(255,255,255,0.2);
+            padding: 14px 35px; border-radius: 50px; font-size: 16px; font-weight: 600;
+            cursor: pointer; margin: 10px; transition: all 0.2s;
+        }
+        .btn-secondary:hover { background: var(--surface); transform: scale(1.05); }
+        .btn-secondary:active { transform: scale(0.95); }
+
+        /* CATEGORY SELECTION */
+        .category-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 12px;
+            max-width: 1000px;
+            width: 95%;
+            margin: 20px auto;
+            padding: 0 10px;
+        }
+
+        .category-card {
+            background: var(--surface);
+            border: 2px solid transparent;
+            border-radius: 16px;
+            padding: 16px 12px;
+            cursor: pointer;
+            transition: all 0.3s var(--ease);
+            text-align: center;
+        }
+
+        .category-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(79, 91, 213, 0.3);
+        }
+
+        .category-card.selected {
+            border-color: var(--success);
+            background: rgba(0, 210, 106, 0.1);
+        }
+
+        .category-icon {
+            font-size: 35px;
+            margin-bottom: 8px;
+        }
+
+        .category-name {
+            font-size: 14px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .category-desc {
+            font-size: 11px;
+            color: var(--text-dim);
+        }
+
+        .selection-summary {
+            margin: 15px 0;
+            padding: 12px 25px;
+            background: var(--surface-light);
+            border-radius: 25px;
+            font-size: 13px;
+            color: var(--text-dim);
+        }
+
+        .quick-select-btns {
+            display: flex;
+            gap: 8px;
+            margin: 15px 0;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        /* DIFFICULTY SELECTOR */
+        .difficulty-selector {
+            display: flex;
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .difficulty-btn {
+            padding: 12px 30px;
+            border-radius: 25px;
+            border: 2px solid rgba(255,255,255,0.2);
+            background: var(--surface);
+            color: var(--text);
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .difficulty-btn:hover {
+            border-color: var(--primary);
+        }
+
+        .difficulty-btn.selected {
+            background: var(--primary);
+            border-color: var(--primary);
+        }
+
+        /* PARTICLES */
+        .particle { position: absolute; pointer-events: none; border-radius: 50%; animation: pop 0.6s ease-out forwards; }
+        @keyframes pop { to { transform: translate(var(--dx), var(--dy)); opacity: 0; } }
+
+        /* HINT BUTTON */
+        .hint-btn {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: var(--text);
+            padding: 10px 25px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            z-index: 25;
+            transition: all 0.3s;
+            backdrop-filter: blur(10px);
+        }
+
+        .hint-btn:hover {
+            background: rgba(255,255,255,0.15);
+            transform: translateX(-50%) scale(1.05);
+        }
+
+        .hint-btn:active {
+            transform: translateX(-50%) scale(0.95);
+        }
+
+        .hint-btn.used {
+            opacity: 0.3;
+            pointer-events: none;
+        }
+
+        /* PAUSE BUTTON */
+        .pause-btn {
+            position: fixed;
+            top: 25px;
+            right: 30px;
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: var(--text);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 20px;
+            z-index: 25;
+            transition: all 0.3s;
+        }
+
+        .pause-btn:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        @media (max-width: 768px) {
+            .category-grid {
+                grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            }
+            h1 { font-size: 40px; }
+            .entity { font-size: 50px; }
+            .emoji-mode { font-size: 70px; }
+            
+            /* --- MOBILE FRIENDLY UPDATE --- */
+            /* This changes the layout to top/bottom on mobile */
+            .stage {
+                flex-direction: column;
+            }
+            
+            /* Changes divider to horizontal line */
+            .divider {
+                width: 70%;
+                height: 1px;
+                left: 15%;
+                right: 15%;
+                top: 50%;
+                bottom: auto;
+                background: linear-gradient(to right, transparent, var(--surface-light), transparent);
+            }
+        }
+
+        /* CUSTOM SCROLLBAR - DARK THEME */
+        ::-webkit-scrollbar {
+            width: 10px;
+            height: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--surface-light);
+            border-radius: 10px;
+            border: 2px solid var(--bg);
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--primary);
+        }
+
+        /* Firefox scrollbar */
+        * {
+            scrollbar-width: thin;
+            scrollbar-color: var(--surface-light) var(--bg);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="overlay" id="start-screen">
+        <div class="overlay-content" style="justify-content: center;">
+            <div style="font-size: 14px; letter-spacing: 4px; color: var(--gold); margin-bottom: 10px;">V20 ULTIMATE</div>
+            <h1>INFINITE MIND</h1>
+            <p style="color:var(--text-dim); font-size: 16px;">Enhanced Edition with 20+ Categories</p>
+            <button class="btn" onclick="Game.showCategorySelection()">START GAME</button>
+            <button class="btn-secondary" onclick="Game.showInfo()">HOW TO PLAY</button>
+        </div>
+    </div>
+
+    <div class="overlay hidden" id="category-screen">
+        <div class="overlay-content">
+            <div style="font-size: 14px; letter-spacing: 4px; color: var(--gold); margin-bottom: 10px;">SELECT CATEGORIES</div>
+            <h1 style="font-size: 40px;">CHOOSE YOUR CHALLENGE</h1>
+            
+            <div class="quick-select-btns">
+                <button class="btn-secondary" onclick="Game.selectAllCategories()">SELECT ALL</button>
+                <button class="btn-secondary" onclick="Game.clearCategories()">CLEAR ALL</button>
+                <button class="btn-secondary" onclick="Game.selectRandom(5)">RANDOM 5</button>
+                <button class="btn-secondary" onclick="Game.selectByType('knowledge')">KNOWLEDGE ONLY</button>
+                <button class="btn-secondary" onclick="Game.selectByType('math')">MATH ONLY</button>
+                <button class="btn-secondary" onclick="Game.selectByType('logic')">LOGIC ONLY</button>
+            </div>
+
+            <div class="selection-summary" id="selection-summary">
+                <span id="selected-count">0</span> categories selected
+            </div>
+
+            <div class="category-grid" id="category-grid"></div>
+
+            <div style="margin-top: 30px;">
+                <div style="font-size: 14px; color: var(--text-dim); margin-bottom: 15px;">DIFFICULTY LEVEL</div>
+                <div class="difficulty-selector">
+                    <div class="difficulty-btn selected" onclick="Game.setDifficulty('normal')" data-difficulty="normal">
+                        NORMAL
+                    </div>
+                    <div class="difficulty-btn" onclick="Game.setDifficulty('hard')" data-difficulty="hard">
+                        HARD
+                    </div>
+                    <div class="difficulty-btn" onclick="Game.setDifficulty('extreme')" data-difficulty="extreme">
+                        EXTREME
+                    </div>
+                </div>
+            </div>
+
+            <button class="btn" onclick="Game.startWithSelection()" style="margin-top: 30px;">START GAME</button>
+            <button class="btn-secondary" onclick="Game.backToStart()">BACK</button>
+        </div>
+    </div>
+
+    <div class="overlay hidden" id="info-screen">
+        <div class="overlay-content" style="justify-content: center;">
+            <h1 style="font-size: 40px;">HOW TO PLAY</h1>
+            <div style="max-width: 600px; text-align: left; padding: 30px; line-height: 1.8;">
+                <p>🎯 <strong>Goal:</strong> Choose the correct answer based on the prompt</p>
+                <p>⏱️ <strong>Timer:</strong> Answer before time runs out. Speed increases with score!</p>
+                <p>✨ <strong>Streak:</strong> Build combos for bonus points</p>
+                <p>💡 <strong>Hint:</strong> Use once per game to eliminate wrong answer</p>
+                <p>🎮 <strong>Categories:</strong> Mix knowledge, logic, and quick thinking</p>
+                <p>🏆 <strong>Difficulty:</strong> Normal, Hard, or Extreme mode</p>
+            </div>
+            <button class="btn" onclick="Game.hideInfo()">GOT IT</button>
+        </div>
+    </div>
+
+    <div class="overlay hidden" id="end-screen">
+        <div class="overlay-content" style="justify-content: center;">
+            <div style="font-size: 12px; color: var(--text-dim); letter-spacing: 2px;">GAME OVER</div>
+            <h1 id="final-score">0</h1>
+            <p id="end-reason" style="color: var(--text-dim); font-size: 18px; margin: 10px 0;">Focus Broken</p>
+            <div id="stats-display" style="margin: 20px 0; color: var(--text-dim); font-size: 14px;"></div>
+            <button class="btn" onclick="Game.restart()">PLAY AGAIN</button>
+            <button class="btn-secondary" onclick="Game.backToStart()">MAIN MENU</button>
+        </div>
+    </div>
+
+    <div id="layout" class="hidden">
+        <div class="timer-wrap"><div class="timer-bar" id="timer"></div></div>
+        
+        <div class="header">
+            <div class="score-box">
+                <div class="label">Score</div>
+                <div class="value" id="score">0</div>
+            </div>
+            <div class="streak-badge" id="streak">🔥 0 Streak</div>
+            <div class="flow-badge" id="flow">ZEN FLOW</div>
+        </div>
+
+        <div class="stage">
+            <div class="divider"></div>
+            
+            <div class="prompt">
+                <div class="prompt-label" id="p-label">Find</div>
+                <div class="prompt-main" id="p-main">Target</div>
+            </div>
+
+            <div class="zone" onclick="Game.input('left')">
+                <div class="entity" id="ent-left"></div>
+            </div>
+
+            <div class="zone" onclick="Game.input('right')">
+                <div class="entity" id="ent-right"></div>
+            </div>
+        </div>
+
+        <button class="hint-btn" id="hint-btn" onclick="Game.useHint()">💡 HINT (1)</button>
+        <button class="pause-btn" onclick="Game.pause()">⏸</button>
+    </div>
+
+    <div class="overlay hidden" id="pause-screen">
+        <div class="overlay-content" style="justify-content: center;">
+            <h1 style="font-size: 40px;">PAUSED</h1>
+            <p style="color: var(--text-dim);">Take a breath</p>
+            <button class="btn" onclick="Game.resume()">RESUME</button>
+            <button class="btn-secondary" onclick="Game.quitToMenu()">QUIT TO MENU</button>
+        </div>
+    </div>
+
+<script>
+    /**
+     * INFINITE MIND V20: ULTIMATE EDITION
+     * - 20+ Diverse Categories
+     * - Category Selection System
+     * - Difficulty Modes
+     * - Hints & Features
+     * - Improved Answer Validation
+     * - No Repetition System
+     */
+
+    const AudioEngine = {
+        ctx: new (window.AudioContext || window.webkitAudioContext)(),
+        play(freq, type, dur) {
+            try {
+                if(this.ctx.state === 'suspended') this.ctx.resume();
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = type; osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+                gain.gain.setValueAtTime(0.1, this.ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + dur);
+                osc.connect(gain); gain.connect(this.ctx.destination);
+                osc.start(); osc.stop(this.ctx.currentTime + dur);
+            } catch(e) {}
+        },
+        hit() { this.play(800, 'sine', 0.1); setTimeout(()=>this.play(1200,'sine',0.05), 40); },
+        fail() { this.play(150, 'sawtooth', 0.3); this.play(120, 'sawtooth', 0.3); },
+        hint() { this.play(600, 'sine', 0.15); }
+    };
+
+    // ========== DATABASE ==========
+    const DB = {
+        // Population data (millions) - EXPANDED
+        countries: [
+            {n:"China",v:1400,e:"🇨🇳"}, {n:"India",v:1380,e:"🇮🇳"}, {n:"USA",v:331,e:"🇺🇸"},
+            {n:"Indonesia",v:273,e:"🇮🇩"}, {n:"Pakistan",v:225,e:"🇵🇰"}, {n:"Brazil",v:213,e:"🇧🇷"},
+            {n:"Nigeria",v:211,e:"🇳🇬"}, {n:"Bangladesh",v:166,e:"🇧🇩"}, {n:"Russia",v:146,e:"🇷🇺"},
+            {n:"Mexico",v:130,e:"🇲🇽"}, {n:"Japan",v:126,e:"🇯🇵"}, {n:"Egypt",v:104,e:"🇪🇬"},
+            {n:"Germany",v:83,e:"🇩🇪"}, {n:"UK",v:68,e:"🇬🇧"}, {n:"France",v:65,e:"🇫🇷"},
+            {n:"Italy",v:60,e:"🇮🇹"}, {n:"South Africa",v:60,e:"🇿🇦"}, {n:"South Korea",v:52,e:"🇰🇷"},
+            {n:"Spain",v:47,e:"🇪🇸"}, {n:"Canada",v:38,e:"🇨🇦"}, {n:"Australia",v:26,e:"🇦🇺"},
+            {n:"Argentina",v:45,e:"🇦🇷"}, {n:"Poland",v:38,e:"🇵🇱"}, {n:"Ukraine",v:44,e:"🇺🇦"},
+            {n:"Morocco",v:37,e:"🇲🇦"}, {n:"Saudi Arabia",v:35,e:"🇸🇦"}, {n:"Peru",v:33,e:"🇵🇪"},
+            {n:"Malaysia",v:33,e:"🇲🇾"}, {n:"Angola",v:33,e:"🇦🇴"}, {n:"Ghana",v:31,e:"🇬🇭"},
+            {n:"Yemen",v:30,e:"🇾🇪"}, {n:"Nepal",v:30,e:"🇳🇵"}, {n:"Venezuela",v:28,e:"🇻🇪"},
+            {n:"Madagascar",v:28,e:"🇲🇬"}, {n:"Cameroon",v:27,e:"🇨🇲"}, {n:"Niger",v:25,e:"🇳🇪"},
+            {n:"Australia",v:26,e:"🇦🇺"}, {n:"Syria",v:18,e:"🇸🇾"}, {n:"Mali",v:21,e:"🇲🇱"},
+            {n:"Chile",v:19,e:"🇨🇱"}, {n:"Romania",v:19,e:"🇷🇴"}, {n:"Netherlands",v:17,e:"🇳🇱"},
+            {n:"Belgium",v:11,e:"🇧🇪"}, {n:"Greece",v:10,e:"🇬🇷"}, {n:"Portugal",v:10,e:"🇵🇹"},
+            {n:"Sweden",v:10,e:"🇸🇪"}, {n:"UAE",v:10,e:"🇦🇪"}, {n:"Austria",v:9,e:"🇦🇹"},
+            {n:"Switzerland",v:8,e:"🇨🇭"}, {n:"Denmark",v:5,e:"🇩🇰"}, {n:"Finland",v:5,e:"🇫🇮"},
+            {n:"Norway",v:5,e:"🇳🇴"}, {n:"New Zealand",v:5,e:"🇳🇿"}, {n:"Ireland",v:5,e:"🇮🇪"},
+            {n:"Singapore",v:5,e:"🇸🇬"}, {n:"Iceland",v:0.4,e:"🇮🇸"}, {n:"Luxembourg",v:0.6,e:"🇱🇺"}
+        ],
+        
+        // Brand value (billions) - EXPANDED
+        brands: [
+            {n:"Apple",v:500,e:"🍎"}, {n:"Microsoft",v:410,e:"💻"}, {n:"Amazon",v:380,e:"📦"},
+            {n:"Google",v:350,e:"🔍"}, {n:"Samsung",v:100,e:"📱"}, {n:"Coca-Cola",v:90,e:"🥤"},
+            {n:"Tesla",v:75,e:"🚗"}, {n:"Mercedes",v:65,e:"🚙"}, {n:"McDonald's",v:55,e:"🍔"},
+            {n:"Disney",v:52,e:"🏰"}, {n:"Nike",v:50,e:"👟"}, {n:"BMW",v:45,e:"🏎️"},
+            {n:"Louis Vuitton",v:48,e:"👜"}, {n:"Pepsi",v:20,e:"🥤"}, {n:"Adidas",v:18,e:"⚽"},
+            {n:"Toyota",v:59,e:"🚙"}, {n:"Facebook",v:101,e:"👥"}, {n:"Instagram",v:47,e:"📷"},
+            {n:"Walmart",v:93,e:"🛒"}, {n:"Visa",v:191,e:"💳"}, {n:"Mastercard",v:108,e:"💳"},
+            {n:"Intel",v:68,e:"💾"}, {n:"Netflix",v:28,e:"📺"}, {n:"Adobe",v:143,e:"🎨"},
+            {n:"Oracle",v:88,e:"💿"}, {n:"IBM",v:60,e:"💼"}, {n:"Sony",v:45,e:"🎮"},
+            {n:"Honda",v:33,e:"🏍️"}, {n:"Ford",v:42,e:"🚙"}, {n:"Volkswagen",v:48,e:"🚗"},
+            {n:"Audi",v:14,e:"🚗"}, {n:"Porsche",v:13,e:"🏎️"}, {n:"Ferrari",v:9,e:"🏎️"},
+            {n:"Gucci",v:18,e:"👜"}, {n:"Chanel",v:15,e:"💄"}, {n:"Hermès",v:19,e:"👜"},
+            {n:"Rolex",v:10,e:"⌚"}, {n:"Cartier",v:12,e:"💍"}, {n:"Prada",v:9,e:"👜"},
+            {n:"Burberry",v:5,e:"🧥"}, {n:"Tiffany",v:6,e:"💎"}, {n:"Zara",v:14,e:"👗"},
+            {n:"H&M",v:13,e:"👔"}, {n:"Uniqlo",v:11,e:"👕"}, {n:"IKEA",v:18,e:"🛋️"},
+            {n:"Starbucks",v:11,e:"☕"}, {n:"KFC",v:6,e:"🍗"}, {n:"Subway",v:5,e:"🥪"},
+            {n:"Pizza Hut",v:4,e:"🍕"}, {n:"Dominos",v:4,e:"🍕"}, {n:"Nestle",v:16,e:"🍫"}
+        ],
+
+        // Food calories (per 100g) - EXPANDED
+        food: [
+            {n:"Butter",v:717,e:"🧈"}, {n:"Peanuts",v:567,e:"🥜"}, {n:"Chocolate",v:546,e:"🍫"},
+            {n:"Cheese",v:402,e:"🧀"}, {n:"Bread",v:265,e:"🍞"}, {n:"Pizza",v:266,e:"🍕"},
+            {n:"Rice",v:130,e:"🍚"}, {n:"Pasta",v:131,e:"🍝"}, {n:"Banana",v:89,e:"🍌"},
+            {n:"Apple",v:52,e:"🍎"}, {n:"Orange",v:47,e:"🍊"}, {n:"Carrot",v:41,e:"🥕"},
+            {n:"Lettuce",v:15,e:"🥬"}, {n:"Cucumber",v:16,e:"🥒"}, {n:"Watermelon",v:30,e:"🍉"},
+            {n:"Almonds",v:579,e:"🌰"}, {n:"Walnuts",v:654,e:"🥜"}, {n:"Cashews",v:553,e:"🥜"},
+            {n:"Avocado",v:160,e:"🥑"}, {n:"Bacon",v:541,e:"🥓"}, {n:"Sausage",v:346,e:"🌭"},
+            {n:"Chicken",v:239,e:"🍗"}, {n:"Beef",v:250,e:"🥩"}, {n:"Salmon",v:208,e:"🐟"},
+            {n:"Tuna",v:184,e:"🐟"}, {n:"Shrimp",v:99,e:"🦐"}, {n:"Egg",v:155,e:"🥚"},
+            {n:"Milk",v:61,e:"🥛"}, {n:"Yogurt",v:59,e:"🥛"}, {n:"Ice Cream",v:207,e:"🍦"},
+            {n:"Cake",v:257,e:"🍰"}, {n:"Donut",v:452,e:"🍩"}, {n:"Cookie",v:502,e:"🍪"},
+            {n:"Croissant",v:406,e:"🥐"}, {n:"Bagel",v:257,e:"🥯"}, {n:"Pancake",v:227,e:"🥞"},
+            {n:"Waffle",v:291,e:"🧇"}, {n:"French Fries",v:312,e:"🍟"}, {n:"Burger",v:295,e:"🍔"},
+            {n:"Hot Dog",v:290,e:"🌭"}, {n:"Tacos",v:226,e:"🌮"}, {n:"Burrito",v:206,e:"🌯"},
+            {n:"Sushi",v:143,e:"🍣"}, {n:"Ramen",v:436,e:"🍜"}, {n:"Soup",v:38,e:"🍲"},
+            {n:"Salad",v:33,e:"🥗"}, {n:"Popcorn",v:387,e:"🍿"}, {n:"Honey",v:304,e:"🍯"},
+            {n:"Jam",v:278,e:"🍓"}, {n:"Mango",v:60,e:"🥭"}, {n:"Grapes",v:69,e:"🍇"},
+            {n:"Strawberry",v:32,e:"🍓"}, {n:"Blueberry",v:57,e:"🫐"}, {n:"Peach",v:39,e:"🍑"},
+            {n:"Pear",v:57,e:"🍐"}, {n:"Pineapple",v:50,e:"🍍"}, {n:"Kiwi",v:61,e:"🥝"}
+        ],
+
+        // Speed (km/h) - EXPANDED
+        speed: [
+            {n:"Cheetah",v:120,e:"🐆"}, {n:"Lion",v:80,e:"🦁"}, {n:"Horse",v:88,e:"🐴"},
+            {n:"Ostrich",v:70,e:"🦩"}, {n:"Elephant",v:40,e:"🐘"}, {n:"Human",v:45,e:"🏃"},
+            {n:"Turtle",v:1,e:"🐢"}, {n:"Snail",v:0.05,e:"🐌"}, {n:"Sloth",v:0.27,e:"🦥"},
+            {n:"Falcon",v:320,e:"🦅"}, {n:"Eagle",v:160,e:"🦅"}, {n:"Rabbit",v:56,e:"🐇"},
+            {n:"Greyhound",v:72,e:"🐕"}, {n:"Kangaroo",v:71,e:"🦘"}, {n:"Gazelle",v:97,e:"🦌"},
+            {n:"Antelope",v:98,e:"🦌"}, {n:"Zebra",v:65,e:"🦓"}, {n:"Giraffe",v:60,e:"🦒"},
+            {n:"Bear",v:56,e:"🐻"}, {n:"Rhino",v:55,e:"🦏"}, {n:"Hippo",v:48,e:"🦛"},
+            {n:"Tiger",v:65,e:"🐅"}, {n:"Leopard",v:58,e:"🐆"}, {n:"Wolf",v:60,e:"🐺"},
+            {n:"Fox",v:50,e:"🦊"}, {n:"Deer",v:48,e:"🦌"}, {n:"Moose",v:56,e:"🦌"},
+            {n:"Crocodile",v:35,e:"🐊"}, {n:"Penguin",v:36,e:"🐧"}, {n:"Dolphin",v:60,e:"🐬"},
+            {n:"Shark",v:50,e:"🦈"}, {n:"Whale",v:48,e:"🐋"}, {n:"Squid",v:40,e:"🦑"},
+            {n:"Octopus",v:40,e:"🐙"}, {n:"Seal",v:35,e:"🦭"}, {n:"Walrus",v:35,e:"🦭"}
+        ],
+
+        // Box office (millions) - EXPANDED
+        movies: [
+            {n:"Avatar",v:2923,e:"🎬"}, {n:"Avengers",v:2798,e:"🦸"}, {n:"Titanic",v:2195,e:"🚢"},
+            {n:"Star Wars",v:2068,e:"⭐"}, {n:"Jurassic World",v:1671,e:"🦖"}, {n:"Lion King",v:1663,e:"🦁"},
+            {n:"Frozen",v:1280,e:"❄️"}, {n:"Harry Potter",v:1342,e:"⚡"}, {n:"Spider-Man",v:1921,e:"🕷️"},
+            {n:"Top Gun",v:1488,e:"✈️"}, {n:"Barbie",v:1445,e:"💗"}, {n:"Mario",v:1355,e:"🍄"},
+            {n:"Black Panther",v:1347,e:"🐾"}, {n:"Frozen 2",v:1450,e:"❄️"}, {n:"Incredibles",v:1242,e:"🦸"},
+            {n:"Finding Dory",v:1028,e:"🐠"}, {n:"Toy Story 4",v:1073,e:"🤠"}, {n:"Joker",v:1074,e:"🃏"},
+            {n:"Aladdin",v:1050,e:"🧞"}, {n:"Aquaman",v:1148,e:"🔱"}, {n:"Bohemian",v:910,e:"🎸"},
+            {n:"The Batman",v:771,e:"🦇"}, {n:"Minions",v:1159,e:"👾"}, {n:"Beauty Beast",v:1263,e:"🌹"},
+            {n:"Finding Nemo",v:940,e:"🐟"}, {n:"Shrek 2",v:928,e:"🧌"}, {n:"Ice Age 3",v:886,e:"🦣"},
+            {n:"Pirates 2",v:1066,e:"🏴‍☠️"}, {n:"Transformers",v:1123,e:"🤖"}, {n:"Iron Man 3",v:1214,e:"🦾"},
+            {n:"Despicable 2",v:970,e:"👾"}, {n:"Skyfall",v:1108,e:"🔫"}, {n:"Matrix",v:1632,e:"🕶️"}
+        ],
+
+        // Temperature (avg °C) - EXPANDED
+        places: [
+            {n:"Sahara",t:30,e:"🏜️"}, {n:"Dubai",t:28,e:"🏙️"}, {n:"Bangkok",t:28,e:"🌴"},
+            {n:"Egypt",t:22,e:"🏛️"}, {n:"Spain",t:17,e:"🇪🇸"}, {n:"London",t:11,e:"🌧️"},
+            {n:"Moscow",t:6,e:"❄️"}, {n:"Antarctica",t:-57,e:"🧊"}, {n:"Iceland",t:5,e:"🌋"},
+            {n:"Alaska",t:-3,e:"🐻"}, {n:"Amazon",t:26,e:"🌳"}, {n:"Australia",t:21,e:"🦘"},
+            {n:"India",t:25,e:"🇮🇳"}, {n:"Brazil",t:24,e:"🇧🇷"}, {n:"Mexico",t:21,e:"🇲🇽"},
+            {n:"Miami",t:24,e:"🏖️"}, {n:"LA",t:18,e:"🌴"}, {n:"New York",t:13,e:"🗽"},
+            {n:"Tokyo",t:16,e:"🗼"}, {n:"Singapore",t:27,e:"🌆"}, {n:"Hong Kong",t:23,e:"🏙️"},
+            {n:"Paris",t:12,e:"🗼"}, {n:"Berlin",t:10,e:"🇩🇪"}, {n:"Rome",t:16,e:"🏛️"},
+            {n:"Athens",t:18,e:"🏛️"}, {n:"Stockholm",t:7,e:"🇸🇪"}, {n:"Oslo",t:6,e:"🇳🇴"},
+            {n:"Helsinki",t:6,e:"🇫🇮"}, {n:"Toronto",t:9,e:"🍁"}, {n:"Vancouver",t:11,e:"🍁"},
+            {n:"Sydney",t:18,e:"🦘"}, {n:"Melbourne",t:15,e:"🦘"}, {n:"Cape Town",t:17,e:"🌍"},
+            {n:"Cairo",t:22,e:"🏛️"}, {n:"Tel Aviv",t:20,e:"🏖️"}, {n:"Istanbul",t:14,e:"🕌"}
+        ],
+
+        // YouTube views (billions) - EXPANDED
+        youtube: [
+            {n:"Baby Shark",v:13.5,e:"🦈"}, {n:"Despacito",v:8.2,e:"🎵"}, {n:"Shape of You",v:6.1,e:"🎶"},
+            {n:"See You Again",v:6.0,e:"🚗"}, {n:"Uptown Funk",v:4.8,e:"🕺"}, {n:"Gangnam Style",v:4.7,e:"🐴"},
+            {n:"Sorry",v:3.6,e:"🎤"}, {n:"Roar",v:3.8,e:"🦁"}, {n:"Shake It Off",v:3.3,e:"💃"},
+            {n:"Bailando",v:3.5,e:"💃"}, {n:"Thinking Out Loud",v:3.7,e:"🎵"}, {n:"Counting Stars",v:3.8,e:"⭐"},
+            {n:"Dark Horse",v:3.2,e:"🐴"}, {n:"Lean On",v:3.1,e:"🎶"}, {n:"Hello",v:3.3,e:"👋"},
+            {n:"Sugar",v:3.7,e:"🍭"}, {n:"Roar",v:3.8,e:"🎵"}, {n:"Girls Like You",v:3.3,e:"💕"},
+            {n:"Closer",v:3.3,e:"🎵"}, {n:"Faded",v:3.5,e:"🎶"}, {n:"Let Her Go",v:3.5,e:"🎵"},
+            {n:"Waka Waka",v:3.6,e:"⚽"}, {n:"Blank Space",v:3.2,e:"📝"}, {n:"Work",v:3.0,e:"🎵"}
+        ],
+
+        // Sports ball size (diameter cm) - EXPANDED
+        sports: [
+            {n:"Basketball",s:24,e:"🏀"}, {n:"Soccer",s:22,e:"⚽"}, {n:"Volleyball",s:21,e:"🏐"},
+            {n:"Tennis",s:6.7,e:"🎾"}, {n:"Baseball",s:7.3,e:"⚾"}, {n:"Golf",s:4.3,e:"⛳"},
+            {n:"Table Tennis",s:4.0,e:"🏓"}, {n:"Bowling",s:21.6,e:"🎳"},
+            {n:"Softball",s:9.7,e:"🥎"}, {n:"Cricket",s:7.2,e:"🏏"}, {n:"Rugby",s:28,e:"🏉"},
+            {n:"Handball",s:19,e:"🤾"}, {n:"Water Polo",s:22,e:"🤽"}, {n:"Lacrosse",s:6.3,e:"🥍"},
+            {n:"Field Hockey",s:7.1,e:"🏑"}, {n:"Squash",s:4.0,e:"🎾"}, {n:"Badminton",s:6.7,e:"🏸"}
+        ],
+
+        // Building height (meters) - EXPANDED
+        buildings: [
+            {n:"Burj Khalifa",v:828,e:"🏢"}, {n:"Shanghai Tower",v:632,e:"🏙️"}, {n:"Mecca Clock",v:601,e:"🕌"},
+            {n:"Ping An",v:599,e:"🏛️"}, {n:"Lotte Tower",v:555,e:"🗼"}, {n:"One WTC",v:541,e:"🏙️"},
+            {n:"CN Tower",v:553,e:"📡"}, {n:"Empire State",v:443,e:"🏢"}, {n:"Eiffel Tower",v:330,e:"🗼"},
+            {n:"Big Ben",v:96,e:"🕰️"}, {n:"Statue Liberty",v:93,e:"🗽"},
+            {n:"Tokyo Skytree",v:634,e:"🗼"}, {n:"Willis Tower",v:442,e:"🏢"}, {n:"Taipei 101",v:508,e:"🏢"},
+            {n:"Petronas",v:452,e:"🏙️"}, {n:"Sears Tower",v:442,e:"🏢"}, {n:"Jin Mao",v:421,e:"🏙️"},
+            {n:"Two IFC",v:412,e:"🏢"}, {n:"Trump Tower",v:423,e:"🏢"}, {n:"Chrysler",v:319,e:"🏢"},
+            {n:"Shard",v:310,e:"🏙️"}, {n:"Transamerica",v:260,e:"🏢"}, {n:"Gherkin",v:180,e:"🏙️"},
+            {n:"Space Needle",v:184,e:"🗼"}, {n:"Leaning Tower",v:56,e:"🗼"}, {n:"Arc Triomphe",v:50,e:"🏛️"}
+        ],
+
+        // Planet data (distance from sun in million km) - EXPANDED
+        planets: [
+            {n:"Mercury",v:58,e:"☿️"}, {n:"Venus",v:108,e:"♀️"}, {n:"Earth",v:150,e:"🌍"},
+            {n:"Mars",v:228,e:"♂️"}, {n:"Jupiter",v:778,e:"♃"}, {n:"Saturn",v:1427,e:"♄"},
+            {n:"Uranus",v:2871,e:"♅"}, {n:"Neptune",v:4497,e:"♆"},
+            {n:"Moon",v:0.384,e:"🌙"}, {n:"Pluto",v:5906,e:"🪐"}, {n:"Ceres",v:414,e:"☄️"}
+        ],
+
+        // Ocean depth (average meters) - EXPANDED
+        oceans: [
+            {n:"Pacific",v:4280,e:"🌊"}, {n:"Atlantic",v:3646,e:"🌊"}, {n:"Indian",v:3741,e:"🌊"},
+            {n:"Southern",v:3270,e:"🌊"}, {n:"Arctic",v:1205,e:"🧊"}, {n:"Mediterranean",v:1500,e:"⛵"},
+            {n:"Caribbean",v:2647,e:"🏝️"}, {n:"South China",v:1652,e:"🌊"}, {n:"Bering Sea",v:1547,e:"🌊"},
+            {n:"Gulf Mexico",v:1486,e:"🌊"}, {n:"Sea of Japan",v:1752,e:"🌊"}, {n:"Red Sea",v:491,e:"🌊"},
+            {n:"Baltic Sea",v:55,e:"🌊"}, {n:"Black Sea",v:1240,e:"🌊"}, {n:"Dead Sea",v:304,e:"🌊"}
+        ],
+
+        // Animal lifespan (years) - EXPANDED
+        animals: [
+            {n:"Turtle",v:100,e:"🐢"}, {n:"Elephant",v:70,e:"🐘"}, {n:"Parrot",v:80,e:"🦜"},
+            {n:"Eagle",v:50,e:"🦅"}, {n:"Lion",v:15,e:"🦁"}, {n:"Dog",v:13,e:"🐕"},
+            {n:"Cat",v:15,e:"🐈"}, {n:"Rabbit",v:9,e:"🐇"}, {n:"Mouse",v:2,e:"🐭"},
+            {n:"Butterfly",v:0.5,e:"🦋"}, {n:"Bee",v:0.15,e:"🐝"},
+            {n:"Whale",v:90,e:"🐋"}, {n:"Gorilla",v:40,e:"🦍"}, {n:"Chimpanzee",v:50,e:"🐵"},
+            {n:"Crocodile",v:70,e:"🐊"}, {n:"Shark",v:70,e:"🦈"}, {n:"Penguin",v:20,e:"🐧"},
+            {n:"Horse",v:30,e:"🐴"}, {n:"Cow",v:20,e:"🐄"}, {n:"Pig",v:15,e:"🐷"},
+            {n:"Chicken",v:8,e:"🐔"}, {n:"Duck",v:10,e:"🦆"}, {n:"Goose",v:20,e:"🦢"},
+            {n:"Kangaroo",v:23,e:"🦘"}, {n:"Koala",v:18,e:"🐨"}, {n:"Panda",v:20,e:"🐼"},
+            {n:"Tiger",v:20,e:"🐅"}, {n:"Leopard",v:17,e:"🐆"}, {n:"Cheetah",v:12,e:"🐆"},
+            {n:"Wolf",v:13,e:"🐺"}, {n:"Fox",v:10,e:"🦊"}, {n:"Bear",v:25,e:"🐻"}
+        ],
+
+        // Tech company founded year - EXPANDED
+        tech: [
+            {n:"IBM",v:1911,e:"💼"}, {n:"HP",v:1939,e:"🖨️"}, {n:"Microsoft",v:1975,e:"💻"},
+            {n:"Apple",v:1976,e:"🍎"}, {n:"Amazon",v:1994,e:"📦"}, {n:"Google",v:1998,e:"🔍"},
+            {n:"Facebook",v:2004,e:"👥"}, {n:"YouTube",v:2005,e:"📹"}, {n:"Twitter",v:2006,e:"🐦"},
+            {n:"Instagram",v:2010,e:"📷"}, {n:"TikTok",v:2016,e:"🎵"},
+            {n:"Sony",v:1946,e:"🎮"}, {n:"Samsung",v:1938,e:"📱"}, {n:"Intel",v:1968,e:"💾"},
+            {n:"Adobe",v:1982,e:"🎨"}, {n:"Oracle",v:1977,e:"💿"}, {n:"Netflix",v:1997,e:"📺"},
+            {n:"eBay",v:1995,e:"🛒"}, {n:"PayPal",v:1998,e:"💳"}, {n:"Spotify",v:2006,e:"🎵"},
+            {n:"Uber",v:2009,e:"🚗"}, {n:"Airbnb",v:2008,e:"🏠"}, {n:"Tesla",v:2003,e:"⚡"},
+            {n:"SpaceX",v:2002,e:"🚀"}, {n:"Nvidia",v:1993,e:"🎮"}, {n:"AMD",v:1969,e:"💾"},
+            {n:"Dell",v:1984,e:"💻"}, {n:"Cisco",v:1984,e:"🌐"}, {n:"Salesforce",v:1999,e:"☁️"}
+        ],
+
+        // Musical notes frequency (Hz) - EXPANDED
+        notes: [
+            {n:"C",v:262,e:"🎵"}, {n:"D",v:294,e:"🎵"}, {n:"E",v:330,e:"🎵"},
+            {n:"F",v:349,e:"🎵"}, {n:"G",v:392,e:"🎵"}, {n:"A",v:440,e:"🎵"},
+            {n:"B",v:494,e:"🎵"}, {n:"C#",v:277,e:"🎵"}, {n:"D#",v:311,e:"🎵"},
+            {n:"F#",v:370,e:"🎵"}, {n:"G#",v:415,e:"🎵"}, {n:"A#",v:466,e:"🎵"}
+        ],
+
+        // Book pages (approximate) - EXPANDED
+        books: [
+            {n:"Bible",v:1200,e:"📖"}, {n:"War & Peace",v:1225,e:"📚"}, {n:"Harry Potter 7",v:607,e:"⚡"},
+            {n:"Lord of Rings",v:1178,e:"💍"}, {n:"Game of Thrones",v:694,e:"👑"}, {n:"1984",v:328,e:"📕"},
+            {n:"Great Gatsby",v:180,e:"📗"}, {n:"Animal Farm",v:112,e:"📘"},
+            {n:"Hobbit",v:310,e:"🧙"}, {n:"Dune",v:688,e:"🏜️"}, {n:"Moby Dick",v:635,e:"🐋"},
+            {n:"Ulysses",v:732,e:"📚"}, {n:"Don Quixote",v:863,e:"🗡️"}, {n:"Odyssey",v:541,e:"⛵"},
+            {n:"Pride Prejudice",v:432,e:"💕"}, {n:"Catcher Rye",v:277,e:"📕"}, {n:"Brave New",v:311,e:"📗"},
+            {n:"Fahrenheit 451",v:249,e:"🔥"}, {n:"To Kill Bird",v:324,e:"🐦"}, {n:"Grapes Wrath",v:464,e:"🍇"}
+        ],
+
+        // Currency value vs USD - EXPANDED
+        currency: [
+            {n:"Kuwait Dinar",v:3.26,e:"💵"}, {n:"British Pound",v:1.27,e:"💷"}, {n:"Euro",v:1.08,e:"💶"},
+            {n:"US Dollar",v:1.00,e:"💵"}, {n:"Canadian Dollar",v:0.74,e:"🍁"}, {n:"Indian Rupee",v:0.012,e:"🇮🇳"},
+            {n:"Japanese Yen",v:0.0067,e:"💴"}, {n:"Egyptian Pound",v:0.032,e:"🇪🇬"},
+            {n:"Swiss Franc",v:1.12,e:"🇨🇭"}, {n:"Australian Dollar",v:0.66,e:"🦘"}, {n:"Singapore Dollar",v:0.74,e:"🦁"},
+            {n:"UAE Dirham",v:0.27,e:"🐪"}, {n:"Saudi Riyal",v:0.27,e:"🕌"}, {n:"South African Rand",v:0.055,e:"🦁"},
+            {n:"Brazilian Real",v:0.20,e:"🇧🇷"}, {n:"Mexican Peso",v:0.050,e:"🌮"}, {n:"Chinese Yuan",v:0.14,e:"🐉"},
+            {n:"Russian Ruble",v:0.010,e:"🐻"}, {n:"Turkish Lira",v:0.029,e:"🦃"}, {n:"Korean Won",v:0.00075,e:"🇰🇷"}
+        ]
+    };
+
+    // ========== CATEGORY DEFINITIONS ==========
+    const CATEGORIES = [
+        {
+            id: 'population',
+            name: 'Population',
+            icon: '🌍',
+            desc: 'Country populations',
+            type: 'knowledge',
+            fn: () => compare(DB.countries, 'v', 'MORE PEOPLE')
+        },
+        {
+            id: 'brands',
+            name: 'Brand Value',
+            icon: '💎',
+            desc: 'Company worth',
+            type: 'knowledge',
+            fn: () => compare(DB.brands, 'v', 'BIGGER BRAND')
+        },
+        {
+            id: 'food',
+            name: 'Calories',
+            icon: '🍔',
+            desc: 'Food calories',
+            type: 'knowledge',
+            fn: () => compare(DB.food, 'v', 'MORE CALORIES')
+        },
+        {
+            id: 'speed',
+            name: 'Speed',
+            icon: '⚡',
+            desc: 'Animal speed',
+            type: 'knowledge',
+            fn: () => compare(DB.speed, 'v', 'FASTER')
+        },
+        {
+            id: 'movies',
+            name: 'Box Office',
+            icon: '🎬',
+            desc: 'Movie earnings',
+            type: 'knowledge',
+            fn: () => compare(DB.movies, 'v', 'BIGGER MOVIE')
+        },
+        {
+            id: 'temperature',
+            name: 'Temperature',
+            icon: '🌡️',
+            desc: 'Climate comparison',
+            type: 'knowledge',
+            fn: () => compare(DB.places, 't', 'HOTTER PLACE')
+        },
+        {
+            id: 'youtube',
+            name: 'YouTube',
+            icon: '📹',
+            desc: 'Video views',
+            type: 'knowledge',
+            fn: () => compare(DB.youtube, 'v', 'MORE VIEWS')
+        },
+        {
+            id: 'sports',
+            name: 'Ball Size',
+            icon: '⚽',
+            desc: 'Sports balls',
+            type: 'knowledge',
+            fn: () => compare(DB.sports, 's', 'BIGGER BALL')
+        },
+        {
+            id: 'buildings',
+            name: 'Buildings',
+            icon: '🏢',
+            desc: 'Structure height',
+            type: 'knowledge',
+            fn: () => compare(DB.buildings, 'v', 'TALLER BUILDING')
+        },
+        {
+            id: 'planets',
+            name: 'Solar System',
+            icon: '🪐',
+            desc: 'Distance from sun',
+            type: 'knowledge',
+            fn: () => compare(DB.planets, 'v', 'FARTHER FROM SUN')
+        },
+        {
+            id: 'oceans',
+            name: 'Ocean Depth',
+            icon: '🌊',
+            desc: 'Average depth',
+            type: 'knowledge',
+            fn: () => compare(DB.oceans, 'v', 'DEEPER OCEAN')
+        },
+        {
+            id: 'animals',
+            name: 'Lifespan',
+            icon: '🐘',
+            desc: 'Animal age',
+            type: 'knowledge',
+            fn: () => compare(DB.animals, 'v', 'LIVES LONGER')
+        },
+        {
+            id: 'tech',
+            name: 'Tech History',
+            icon: '💻',
+            desc: 'Founded year',
+            type: 'knowledge',
+            fn: () => compare(DB.tech, 'v', 'FOUNDED EARLIER')
+        },
+        {
+            id: 'books',
+            name: 'Book Length',
+            icon: '📚',
+            desc: 'Page count',
+            type: 'knowledge',
+            fn: () => compare(DB.books, 'v', 'MORE PAGES')
+        },
+        {
+            id: 'currency',
+            name: 'Currency',
+            icon: '💱',
+            desc: 'Value vs USD',
+            type: 'knowledge',
+            fn: () => compare(DB.currency, 'v', 'STRONGER CURRENCY')
+        },
+        {
+            id: 'math_add',
+            name: 'Addition',
+            icon: '➕',
+            desc: 'Quick math',
+            type: 'math',
+            fn: () => {
+                const n1 = r(30) + 1, n2 = r(30) + 1;
+                return mathGen(n1 + n2, `${n1} + ${n2}`);
+            }
+        },
+        {
+            id: 'math_sub',
+            name: 'Subtraction',
+            icon: '➖',
+            desc: 'Quick math',
+            type: 'math',
+            fn: () => {
+                const n1 = r(40) + 20, n2 = r(20) + 1;
+                return mathGen(n1 - n2, `${n1} - ${n2}`);
+            }
+        },
+        {
+            id: 'math_mul',
+            name: 'Multiply',
+            icon: '✖️',
+            desc: 'Quick math',
+            type: 'math',
+            fn: () => {
+                const n1 = r(12) + 2, n2 = r(12) + 2;
+                return mathGen(n1 * n2, `${n1} × ${n2}`);
+            }
+        },
+        {
+            id: 'stroop',
+            name: 'Color Focus',
+            icon: '🎨',
+            desc: 'Text vs color',
+            type: 'logic',
+            fn: () => {
+                const colors = [
+                    {n:'RED', h:'#ff4444'}, {n:'BLUE', h:'#4488ff'}, 
+                    {n:'GREEN', h:'#44ff44'}, {n:'YELLOW', h:'#ffff44'}
+                ];
+                const target = colors[r(colors.length)];
+                const wrongColor = colors.filter(c => c.n !== target.n)[r(colors.length - 1)];
+                return {
+                    l: "FOCUS",
+                    p: `TEXT IS "${target.n}"`,
+                    wHTML: `<div class="text-mode" style="color:${wrongColor.h}">${target.n}</div>`,
+                    lHTML: `<div class="text-mode" style="color:${target.h}">${colors.filter(c => c.n !== target.n)[r(colors.length - 1)].n}</div>`
+                };
+            }
+        },
+        {
+            id: 'direction',
+            name: 'Direction',
+            icon: '🧭',
+            desc: 'Arrow direction',
+            type: 'logic',
+            fn: () => {
+                const dirs = [
+                    {n:'UP', e:'⬆️'}, {n:'DOWN', e:'⬇️'}, 
+                    {n:'LEFT', e:'⬅️'}, {n:'RIGHT', e:'➡️'}
+                ];
+                const target = dirs[r(dirs.length)];
+                const wrong = dirs.filter(d => d.n !== target.n)[r(dirs.length - 1)];
+                return {
+                    l: "DIRECTION",
+                    p: target.n,
+                    wHTML: `<div class="emoji-mode">${target.e}</div>`,
+                    lHTML: `<div class="emoji-mode">${wrong.e}</div>`
+                };
+            }
+        },
+        {
+            id: 'emotion',
+            name: 'Emotions',
+            icon: '😊',
+            desc: 'Facial expressions',
+            type: 'logic',
+            fn: () => {
+                const emos = [
+                    {n:'HAPPY', e:'😄'}, {n:'SAD', e:'😢'}, 
+                    {n:'ANGRY', e:'😠'}, {n:'SURPRISED', e:'😮'}
+                ];
+                const target = emos[r(emos.length)];
+                const wrong = emos.filter(e => e.n !== target.n)[r(emos.length - 1)];
+                return {
+                    l: "EMOTION",
+                    p: target.n,
+                    wHTML: `<div class="emoji-mode">${target.e}</div>`,
+                    lHTML: `<div class="emoji-mode">${wrong.e}</div>`
+                };
+            }
+        },
+        {
+            id: 'shapes',
+            name: 'Shapes',
+            icon: '🔷',
+            desc: 'Geometric shapes',
+            type: 'logic',
+            fn: () => {
+                const shapes = [
+                    {n:'CIRCLE', e:'⭕'}, {n:'SQUARE', e:'🟦'}, 
+                    {n:'TRIANGLE', e:'🔺'}, {n:'STAR', e:'⭐'}
+                ];
+                const target = shapes[r(shapes.length)];
+                const wrong = shapes.filter(s => s.n !== target.n)[r(shapes.length - 1)];
+                return {
+                    l: "SHAPE",
+                    p: target.n,
+                    wHTML: `<div class="emoji-mode">${target.e}</div>`,
+                    lHTML: `<div class="emoji-mode">${wrong.e}</div>`
+                };
+            }
+        },
+        {
+            id: 'odd_even',
+            name: 'Odd/Even',
+            icon: '🔢',
+            desc: 'Number type',
+            type: 'logic',
+            fn: () => {
+                const num = r(100) + 1;
+                const isEven = num % 2 === 0;
+                return {
+                    l: "NUMBER TYPE",
+                    p: isEven ? "EVEN NUMBER" : "ODD NUMBER",
+                    wHTML: `<div class="entity math-mode">${num}</div>`,
+                    lHTML: `<div class="entity math-mode">${isEven ? num + 1 : num - 1}</div>`
+                };
+            }
+        },
+        {
+            id: 'greater_less',
+            name: 'Greater/Less',
+            icon: '⚖️',
+            desc: 'Number comparison',
+            type: 'logic',
+            fn: () => {
+                const n1 = r(50) + 10;
+                const n2 = r(50) + 10;
+                if (n1 === n2) return CATEGORIES.find(c => c.id === 'greater_less').fn();
+                const greater = Math.max(n1, n2);
+                const lesser = Math.min(n1, n2);
+                return {
+                    l: "COMPARISON",
+                    p: "GREATER NUMBER",
+                    wHTML: `<div class="entity math-mode">${greater}</div>`,
+                    lHTML: `<div class="entity math-mode">${lesser}</div>`
+                };
+            }
+        }
+    ];
+
+    // Helper functions
+    function compare(arr, prop, label) {
+        const shuffled = [...arr].sort(() => Math.random() - 0.5);
+        let a = shuffled[0];
+        let b = shuffled[1];
+        
+        // Ensure different items
+        let attempts = 0;
+        while ((a.n === b.n || a[prop] === b[prop]) && attempts < 20) {
+            b = shuffled[r(shuffled.length)];
+            attempts++;
+        }
+        
+        const win = a[prop] > b[prop] ? a : b;
+        const lose = a[prop] > b[prop] ? b : a;
+
+        return {
+            l: "KNOWLEDGE",
+            p: label,
+            wHTML: `<div class="entity emoji-mode">${win.e}</div><div class="sub-text">${win.n}</div>`,
+            lHTML: `<div class="entity emoji-mode">${lose.e}</div><div class="sub-text">${lose.n}</div>`
+        };
+    }
+
+    function mathGen(ans, q) {
+        let fake = ans + (Math.random() > 0.5 ? r(5) + 1 : -(r(5) + 1));
+        // Ensure different
+        if (fake === ans) fake = ans + 3;
+        return {
+            l: "MATH",
+            p: q,
+            wHTML: `<div class="entity math-mode">${ans}</div>`,
+            lHTML: `<div class="entity math-mode">${fake}</div>`
+        };
+    }
+
+    function r(n) { return Math.floor(Math.random() * n); }
+
+    // ========== GAME ENGINE ==========
+    const Game = {
+        active: false,
+        score: 0,
+        streak: 0,
+        bestStreak: 0,
+        timer: 100,
+        difficulty: 'normal',
+        selectedCategories: [],
+        categoryBag: [],
+        correctSide: null,
+        loopId: null,
+        isPaused: false,
+        hintsRemaining: 1,
+        hintUsedThisRound: false,
+
+        dom: {
+            timer: document.getElementById('timer'),
+            score: document.getElementById('score'),
+            streak: document.getElementById('streak'),
+            flow: document.getElementById('flow'),
+            pLabel: document.getElementById('p-label'),
+            pMain: document.getElementById('p-main'),
+            left: document.getElementById('ent-left'),
+            right: document.getElementById('ent-right'),
+            startScreen: document.getElementById('start-screen'),
+            categoryScreen: document.getElementById('category-screen'),
+            infoScreen: document.getElementById('info-screen'),
+            endScreen: document.getElementById('end-screen'),
+            pauseScreen: document.getElementById('pause-screen'),
+            layout: document.getElementById('layout'),
+            final: document.getElementById('final-score'),
+            reason: document.getElementById('end-reason'),
+            statsDisplay: document.getElementById('stats-display'),
+            hintBtn: document.getElementById('hint-btn'),
+            categoryGrid: document.getElementById('category-grid'),
+            selectionSummary: document.getElementById('selection-summary'),
+            selectedCount: document.getElementById('selected-count')
+        },
+
+        showCategorySelection() {
+            this.dom.startScreen.classList.add('hidden');
+            this.dom.categoryScreen.classList.remove('hidden');
+            this.renderCategories();
+            this.updateSelectionSummary();
+        },
+
+        renderCategories() {
+            this.dom.categoryGrid.innerHTML = CATEGORIES.map(cat => `
+                <div class="category-card" data-id="${cat.id}" onclick="Game.toggleCategory('${cat.id}')">
+                    <div class="category-icon">${cat.icon}</div>
+                    <div class="category-name">${cat.name}</div>
+                    <div class="category-desc">${cat.desc}</div>
+                </div>
+            `).join('');
+        },
+
+        toggleCategory(id) {
+            const idx = this.selectedCategories.indexOf(id);
+            const card = document.querySelector(`[data-id="${id}"]`);
+            
+            if (idx > -1) {
+                this.selectedCategories.splice(idx, 1);
+                card.classList.remove('selected');
+            } else {
+                this.selectedCategories.push(id);
+                card.classList.add('selected');
+            }
+            
+            this.updateSelectionSummary();
+        },
+
+        selectAllCategories() {
+            this.selectedCategories = CATEGORIES.map(c => c.id);
+            document.querySelectorAll('.category-card').forEach(card => card.classList.add('selected'));
+            this.updateSelectionSummary();
+        },
+
+        clearCategories() {
+            this.selectedCategories = [];
+            document.querySelectorAll('.category-card').forEach(card => card.classList.remove('selected'));
+            this.updateSelectionSummary();
+        },
+
+        selectRandom(count) {
+            this.clearCategories();
+            const shuffled = [...CATEGORIES].sort(() => Math.random() - 0.5);
+            for (let i = 0; i < Math.min(count, shuffled.length); i++) {
+                this.toggleCategory(shuffled[i].id);
+            }
+        },
+
+        selectByType(type) {
+            this.clearCategories();
+            const filtered = CATEGORIES.filter(c => c.type === type);
+            filtered.forEach(cat => this.toggleCategory(cat.id));
+        },
+
+        updateSelectionSummary() {
+            this.dom.selectedCount.textContent = this.selectedCategories.length;
+        },
+
+        setDifficulty(level) {
+            this.difficulty = level;
+            document.querySelectorAll('.difficulty-btn').forEach(btn => {
+                btn.classList.toggle('selected', btn.dataset.difficulty === level);
+            });
+        },
+
+        startWithSelection() {
+            if (this.selectedCategories.length === 0) {
+                alert('Please select at least one category!');
+                return;
+            }
+            this.start();
+        },
+
+        start() {
+            // If no categories selected, use all
+            if (this.selectedCategories.length === 0) {
+                this.selectedCategories = CATEGORIES.map(c => c.id);
+            }
+
+            this.active = true;
+            this.score = 0;
+            this.streak = 0;
+            this.bestStreak = 0;
+            this.timer = 100;
+            this.categoryBag = [];
+            this.isPaused = false;
+            this.hintsRemaining = 1;
+            this.hintUsedThisRound = false;
+
+            // Hide all overlays and show game
+            this.dom.startScreen.classList.add('hidden');
+            this.dom.categoryScreen.classList.add('hidden');
+            this.dom.endScreen.classList.add('hidden');
+            this.dom.pauseScreen.classList.add('hidden');
+            this.dom.layout.classList.remove('hidden');
+
+            this.updateHUD();
+            this.nextRound();
+            
+            if (this.loopId) cancelAnimationFrame(this.loopId);
+            this.loop();
+        },
+
+        loop() {
+            if (!this.active || this.isPaused) return;
+            
+            // Difficulty-based speed
+            let baseSpeed = 0.25;
+            if (this.difficulty === 'hard') baseSpeed = 0.35;
+            if (this.difficulty === 'extreme') baseSpeed = 0.5;
+            
+            const speed = baseSpeed + (this.score * 0.005);
+            this.timer -= speed;
+            this.dom.timer.style.transform = `scaleX(${Math.max(0, this.timer / 100)})`;
+            
+            // Color warning
+            if (this.timer < 30) this.dom.timer.style.background = 'var(--gold)';
+            else this.dom.timer.style.background = 'var(--text)';
+
+            if (this.timer <= 0) this.over("TIME OUT");
+            else this.loopId = requestAnimationFrame(() => this.loop());
+        },
+
+        input(side) {
+            if (!this.active || this.isPaused) return;
+            
+            if (side === this.correctSide) {
+                this.score++;
+                this.streak++;
+                this.bestStreak = Math.max(this.bestStreak, this.streak);
+                this.timer = 100; // Full reset
+                this.hintUsedThisRound = false;
+                
+                AudioEngine.hit();
+                this.spawnParticles(side);
+                this.updateHUD();
+                this.nextRound();
+            } else {
+                this.over("WRONG CHOICE");
+            }
+        },
+
+        useHint() {
+            if (this.hintsRemaining === 0 || this.hintUsedThisRound) return;
+            
+            this.hintsRemaining--;
+            this.hintUsedThisRound = true;
+            AudioEngine.hint();
+            
+            // Highlight wrong answer with subtle effect
+            const wrongSide = this.correctSide === 'left' ? 'right' : 'left';
+            const wrongElem = this.correctSide === 'left' ? this.dom.right : this.dom.left;
+            
+            wrongElem.style.opacity = '0.3';
+            setTimeout(() => {
+                wrongElem.style.opacity = '1';
+            }, 1000);
+            
+            this.dom.hintBtn.classList.add('used');
+            this.dom.hintBtn.textContent = '💡 HINT (0)';
+        },
+
+        pause() {
+            if (!this.active) return;
+            this.isPaused = true;
+            this.dom.pauseScreen.classList.remove('hidden');
+        },
+
+        resume() {
+            this.isPaused = false;
+            this.dom.pauseScreen.classList.add('hidden');
+            this.loop();
+        },
+
+        quitToMenu() {
+            this.active = false;
+            this.isPaused = false;
+            this.backToStart();
+        },
+
+        over(msg) {
+            this.active = false;
+            AudioEngine.fail();
+            
+            this.dom.final.innerText = this.score;
+            this.dom.reason.innerText = msg;
+            this.dom.statsDisplay.innerHTML = `
+                Best Streak: ${this.bestStreak} 🔥<br>
+                Difficulty: ${this.difficulty.toUpperCase()}<br>
+                Categories: ${this.selectedCategories.length}
+            `;
+            
+            this.dom.layout.classList.add('hidden');
+            this.dom.endScreen.classList.remove('hidden');
+        },
+
+        updateHUD() {
+            this.dom.score.innerText = this.score;
+            this.dom.streak.innerText = `🔥 ${this.streak} Streak`;
+            
+            if (this.score >= 10) this.dom.flow.classList.add('active');
+            else this.dom.flow.classList.remove('active');
+        },
+
+        spawnParticles(side) {
+            const rect = (side === 'left' ? this.dom.left : this.dom.right).getBoundingClientRect();
+            const x = rect.left + rect.width / 2;
+            const y = rect.top + rect.height / 2;
+            
+            for (let i = 0; i < 10; i++) {
+                const p = document.createElement('div');
+                p.className = 'particle';
+                p.style.left = x + 'px';
+                p.style.top = y + 'px';
+                p.style.width = (Math.random() * 10 + 5) + 'px';
+                p.style.height = p.style.width;
+                p.style.background = `hsl(${Math.random() * 360}, 100%, 60%)`;
+                
+                const ang = Math.random() * Math.PI * 2;
+                const dist = Math.random() * 80 + 40;
+                p.style.setProperty('--dx', Math.cos(ang) * dist + 'px');
+                p.style.setProperty('--dy', Math.sin(ang) * dist + 'px');
+                
+                document.body.appendChild(p);
+                setTimeout(() => p.remove(), 600);
+            }
+        },
+
+        nextRound() {
+            this.dom.left.innerHTML = '';
+            this.dom.right.innerHTML = '';
+            
+            // Refill bag if empty
+            if (this.categoryBag.length === 0) {
+                this.categoryBag = [...this.selectedCategories];
+                this.categoryBag.sort(() => Math.random() - 0.5);
+            }
+            
+            const catId = this.categoryBag.pop();
+            const category = CATEGORIES.find(c => c.id === catId);
+            
+            if (!category) {
+                console.error('Category not found:', catId);
+                return;
+            }
+            
+            const data = category.fn();
+            const isLeft = Math.random() > 0.5;
+            this.correctSide = isLeft ? 'left' : 'right';
+
+            this.dom.pLabel.innerText = data.l;
+            this.dom.pMain.innerText = data.p;
+            this.dom.left.innerHTML = isLeft ? data.wHTML : data.lHTML;
+            this.dom.right.innerHTML = isLeft ? data.lHTML : data.wHTML;
+        },
+
+        restart() {
+            this.start();
+        },
+
+        backToStart() {
+            this.dom.categoryScreen.classList.add('hidden');
+            this.dom.endScreen.classList.add('hidden');
+            this.dom.pauseScreen.classList.add('hidden');
+            this.dom.layout.classList.add('hidden');
+            this.dom.startScreen.classList.remove('hidden');
+        },
+
+        showInfo() {
+            this.dom.startScreen.classList.add('hidden');
+            this.dom.infoScreen.classList.remove('hidden');
+        },
+
+        hideInfo() {
+            this.dom.infoScreen.classList.add('hidden');
+            this.dom.startScreen.classList.remove('hidden');
+        }
+    };
+</script>
+</body>
+</html>
